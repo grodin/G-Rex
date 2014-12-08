@@ -1,5 +1,5 @@
 /*
- * Copyright (C) GRIDSTONE 2014
+ * Copyright 2014 Joseph Cooper
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-include ':grex'
-include ':grex-example'
-include ':converters:gson-converter'
-include ':converters:jackson-converter'
-include 'grex-core'
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+version = '1.2.0'
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
