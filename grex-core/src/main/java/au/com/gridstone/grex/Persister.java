@@ -85,7 +85,8 @@ public interface Persister {
      * Clears any data stored at the specified key.
      *
      * @param key The key to clear data at.
-     * @return An Observable that calls onNext(true) if data was cleared.
+     * @return An Observable that calls onNext(true) if data was cleared and
+     * then completes.
      */
     Observable<Boolean> clear(String key);
 }
