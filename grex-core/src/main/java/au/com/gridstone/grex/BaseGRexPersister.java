@@ -1,4 +1,4 @@
-package au.com.gridstone.grex.core;/*
+package au.com.gridstone.grex;/*
  * Copyright (C) GRIDSTONE 2014
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,9 @@ package au.com.gridstone.grex.core;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileReader;
@@ -32,6 +35,8 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Func1;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Facilitates the read and write of objects to and from an application's private directory.
  *
@@ -40,16 +45,25 @@ import rx.functions.Func1;
 public abstract class BaseGRexPersister implements Persister {
     private final Converter converter;
 
+    private final FileFactory fileFactory;
+
     /**
-     * Create a new instances using a provided au.com.gridstone.grex.converter.
+     * Create a new instance using a provided {@link au.com.gridstone.grex.converter.Converter}
+     * and a provided {@link FileFactory}.
      *
-     * @param converter Converter used to serialize/deserialize objects.*/
-    public BaseGRexPersister(Converter converter) {
-        this.converter = converter;
+     * @param converter Converter used to serialize/deserialize objects.
+     * @param fileFactory FileFactory used to get {@link File} to write to and
+     *                    read from.
+     */
+    public BaseGRexPersister(@NotNull final Converter converter,
+                             @NotNull final FileFactory fileFactory) {
+        this.converter = checkNotNull(converter);
+        this.fileFactory = checkNotNull(fileFactory);
     }
 
     @Override
-    public final <T> Observable<List<T>> putList(final String key, final List<T>
+    public final <T> Observable<List<T>> putList(final String key,
+                                                 final List<T>
             list, final Class<T> type) {
         return Observable.create(new Observable.OnSubscribe<List<T>>() {
             @Override
@@ -277,7 +291,9 @@ public abstract class BaseGRexPersister implements Persister {
         });
     }
 
-    protected abstract File getFile(String key);
+    private File getFile(final String key) {
+        return fileFactory.getFile(key);
+    }
 
     private static final class ListOfSomething<T> implements ParameterizedType {
         private final Class<?> wrappedType;

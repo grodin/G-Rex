@@ -1,4 +1,4 @@
-package au.com.gridstone.grex.core;
+package au.com.gridstone.grex;
 
 import java.util.List;
 

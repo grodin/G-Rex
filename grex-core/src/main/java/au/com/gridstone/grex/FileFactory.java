@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Joseph Cooper
+ * Copyright 2014 Omricat Software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-apply plugin: 'java'
+package au.com.gridstone.grex;
 
-sourceCompatibility = 1.7
-version = VERSION_NAME
+import org.jetbrains.annotations.NotNull;
 
-repositories {
-    jcenter()
-    mavenCentral()
-}
+import java.io.File;
 
-dependencies {
+/**
+ * Interface to provide a {@link File} given a {@code String} key.
+ *
+ * @author Joseph Cooper
+ */
+public interface FileFactory {
 
-    compile 'io.reactivex:rxjava:1.0.1'
-    compile 'com.omricat.guava-preconditions:guava-preconditions:18.0@jar'
-    compile 'org.jetbrains:annotations:13.0@jar'
-
-    testCompile 'junit:junit:4.11'
+    /**
+     * Return a {@link File} from a {@code String} key.
+     * Must not return null.
+     */
+    public @NotNull File getFile(final String key);
 }
