@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Christopher Horner
  */
-public abstract class BaseGRexPersister implements Persister {
+public class BaseGRexPersister implements Persister {
     private final Converter converter;
 
     private final FileFactory fileFactory;
