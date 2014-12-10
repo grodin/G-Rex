@@ -43,15 +43,27 @@ public class GRexPersister extends BaseGRexPersister {
      */
     public GRexPersister(final Context context, final String dirName,
                          final Converter converter) {
-        super(converter, new FileFactory() {
-            @NotNull
-            @Override
-            public File getFile(final String key) {
-                return new File(context.getApplicationContext().getDir(dirName, MODE_PRIVATE),
+        super(converter, new AndroidFileFactory(context,dirName));
+    }
 
-                        key);
-            }
-        });
+    public static class AndroidFileFactory implements FileFactory {
+
+        private final Context context;
+        private final String dirName;
+
+        public AndroidFileFactory(final Context context, final String dirName) {
+            this.context = context;
+            this.dirName = dirName;
+        }
+
+
+        @NotNull
+        @Override
+        public File getFile(final String key) {
+            return new File(context.getApplicationContext().getDir(dirName, MODE_PRIVATE),
+
+                    key);
+        }
     }
 
 }
