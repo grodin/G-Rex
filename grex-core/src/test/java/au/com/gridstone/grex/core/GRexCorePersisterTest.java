@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package au.com.gridstone.grex.core.test;
+package au.com.gridstone.grex.core;
 
 
 import org.junit.Test;
@@ -22,7 +22,6 @@ import org.junit.Test;
 import java.io.File;
 
 import au.com.gridstone.grex.converter.Converter;
-import au.com.gridstone.grex.core.GRexCorePersister;
 
 public class GRexCorePersisterTest {
 

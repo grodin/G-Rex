@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package au.com.gridstone.grex.core.test;
+package au.com.gridstone.grex.core;
 
 import java.io.Reader;
 import java.io.Writer;
@@ -25,7 +25,7 @@ import java.util.List;
 import au.com.gridstone.grex.converter.Converter;
 import au.com.gridstone.grex.converter.ConverterException;
 
-class TestConverter implements Converter {
+public class TestConverter implements Converter {
 
     List writeLog = new ArrayList();
     List readLog = new ArrayList();

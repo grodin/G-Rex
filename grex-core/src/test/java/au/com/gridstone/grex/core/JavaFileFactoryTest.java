@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package au.com.gridstone.grex.core.test;
+package au.com.gridstone.grex.core;
 
 import org.junit.Test;
 
