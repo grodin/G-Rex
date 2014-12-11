@@ -18,6 +18,7 @@ package au.com.gridstone.grex;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,12 +30,13 @@ import java.io.Writer;
 import au.com.gridstone.grex.core.TestConverter;
 
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 public class BaseGRexPersisterTest {
 
     @Test( expected = NullPointerException.class )
     public void testConstructor1stArgNull() {
-        new BaseGRexPersister(null, mockFileFactory, mockIOFactory);
+        new BaseGRexPersister(null, new TestFileFactory(), mockIOFactory);
     }
 
     @Test( expected = NullPointerException.class )
@@ -44,12 +46,14 @@ public class BaseGRexPersisterTest {
 
     @Test( expected = NullPointerException.class )
     public void testConstructor3rdArgNull() {
-        new BaseGRexPersister(new TestConverter(), mockFileFactory, null);
+        new BaseGRexPersister(new TestConverter(), new TestFileFactory(), null);
     }
 
     private void unimplementedTest() {
         fail("Test not implemented yet");
     }
+
+
 
 
     @Test
@@ -92,13 +96,24 @@ public class BaseGRexPersisterTest {
         unimplementedTest();
     }
 
-    FileFactory mockFileFactory = new FileFactory() {
-        @NotNull
-        @Override
-        public File getFile(final String key) {
-            return null;
+    static class TestFileFactory implements FileFactory {
+
+        private final boolean fileExists;
+
+        TestFileFactory(final boolean fileExists) {
+            this.fileExists = fileExists;
         }
-    };
+
+        TestFileFactory() {
+            this(true);
+        }
+
+        @NotNull @Override public File getFile(final String key) {
+            File file = Mockito.mock(File.class);
+            when(file.exists()).thenReturn(true);
+            return file;
+        }
+    }
 
 
     ReaderWriterFactory mockIOFactory = new ReaderWriterFactory() {
