@@ -20,6 +20,11 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 
 import au.com.gridstone.grex.core.TestConverter;
 
@@ -29,12 +34,17 @@ public class BaseGRexPersisterTest {
 
     @Test( expected = NullPointerException.class )
     public void testConstructor1stArgNull() {
-        new BaseGRexPersister(null, mockFileFactory);
+        new BaseGRexPersister(null, mockFileFactory, mockIOFactory);
     }
 
     @Test( expected = NullPointerException.class )
     public void testConstructor2ndArgNull() {
-        new BaseGRexPersister(new TestConverter(), null);
+        new BaseGRexPersister(new TestConverter(), null, mockIOFactory);
+    }
+
+    @Test( expected = NullPointerException.class )
+    public void testConstructor3rdArgNull() {
+        new BaseGRexPersister(new TestConverter(), mockFileFactory, null);
     }
 
     private void unimplementedTest() {
@@ -87,6 +97,23 @@ public class BaseGRexPersisterTest {
         @Override
         public File getFile(final String key) {
             return null;
+        }
+    };
+
+
+    ReaderWriterFactory mockIOFactory = new ReaderWriterFactory() {
+
+        final Reader reader = new StringReader("");
+        final StringWriter writer = new StringWriter();
+
+        @NotNull @Override
+        public Reader getReader(final File file) throws IOException {
+            return reader;
+        }
+
+        @NotNull @Override
+        public Writer getWriter(final File file) throws IOException {
+            return writer;
         }
     };
 }
