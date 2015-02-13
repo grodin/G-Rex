@@ -38,16 +38,18 @@ public class FileIODelegate implements IODelegate {
 
     public FileIODelegate(@NotNull final File directory) {
         checkNotNull(directory);
-        checkArgument(directory.isDirectory());
+        checkArgument(directory.isDirectory(), "not a directory");
         this.directory = directory;
     }
 
-
+    // I would massively prefer to use something like Optional<Reader> as the
+    // return type here, but I don't want to pull in a huge dependency like
+    // Guava and this needs to be Java 7 compatible for Android use.
     @Override
     public Reader getReader(@NotNull final String key) throws IOException {
         final File file = getFile(checkNotNull(key));
         if (!file.exists()) {
-            return null;
+            return null; //eurgh, returning null!
         } else {
             return new FileReader(file);
         }
@@ -59,7 +61,7 @@ public class FileIODelegate implements IODelegate {
     }
 
     @Override public boolean clear(@NotNull final String key) {
-        return getFile(key).delete();
+        return getFile(checkNotNull(key)).delete();
     }
 
     private File getFile(final String key) {

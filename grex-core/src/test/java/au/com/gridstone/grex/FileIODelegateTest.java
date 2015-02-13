@@ -16,6 +16,69 @@
 
 package au.com.gridstone.grex;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Reader;
+import java.io.Writer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class FileIODelegateTest {
 
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder();
+
+    @Test(expected = NullPointerException.class)
+    public void testConstructor_NullArg() throws Exception {
+        new FileIODelegate(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor_NonDirectoryArg() throws Exception {
+        new FileIODelegate(tmpDir.newFile());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testGetReader_NullKey() throws Exception {
+        new FileIODelegate(tmpDir.getRoot()).getReader(null);
+    }
+
+    @Test
+    public void testGetReader_NonExistentFile() throws Exception {
+        IODelegate delegate = new FileIODelegate(tmpDir.newFolder());
+
+        Reader ret = delegate.getReader("non-existent");
+
+        assertThat(ret).isNull();
+    }
+
+    @Test
+    public void testGetReaderReturnsFileReader() throws Exception {
+        tmpDir.newFile("TestKey");
+        Reader ret = new FileIODelegate(tmpDir.getRoot()).getReader("TestKey");
+
+        assertThat(ret).isInstanceOf(FileReader.class);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testGetWriter_NullParam() throws Exception {
+        new FileIODelegate(tmpDir.getRoot()).getWriter(null);
+    }
+
+    @Test
+    public void testGetWriterReturnsFileWriter() throws Exception {
+        tmpDir.newFile("TestKey");
+        Writer ret = new FileIODelegate(tmpDir.getRoot()).getWriter("TestKey");
+
+        assertThat(ret).isInstanceOf(FileWriter.class);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testClear_NullParam() throws Exception {
+        new FileIODelegate(tmpDir.getRoot()).clear(null);
+    }
 }
