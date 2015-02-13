@@ -27,10 +27,11 @@ repositories {
 dependencies {
 
     compile 'io.reactivex:rxjava:1.0.1'
-    compile 'com.omricat.guava-preconditions:guava-preconditions:18.0@jar'
+    compile 'com.omricat.guava-preconditions:guava-preconditions:18.0.1@jar'
     compile 'org.jetbrains:annotations:13.0@jar'
 
     testCompile 'junit:junit:4.11'
     testCompile 'org.assertj:assertj-core:1.7.0'
     testCompile "org.mockito:mockito-core:1.10.14"
 }
+

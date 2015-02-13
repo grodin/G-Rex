@@ -33,7 +33,7 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Func1;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.omricat.common.base.Preconditions.checkNotNull;
 
 /**
  * Facilitates the read and write of objects to and from an application's

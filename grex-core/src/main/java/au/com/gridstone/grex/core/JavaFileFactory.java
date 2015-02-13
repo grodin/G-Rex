@@ -22,7 +22,7 @@ import java.io.File;
 
 import au.com.gridstone.grex.FileFactory;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.omricat.common.base.Preconditions.checkArgument;
 
 public class JavaFileFactory implements FileFactory {
 

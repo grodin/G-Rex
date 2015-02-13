@@ -22,7 +22,7 @@ import java.io.File;
 import au.com.gridstone.grex.BaseGRexPersister;
 import au.com.gridstone.grex.converter.Converter;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.omricat.common.base.Preconditions.checkNotNull;
 
 
 public class GRexCorePersister extends BaseGRexPersister {
