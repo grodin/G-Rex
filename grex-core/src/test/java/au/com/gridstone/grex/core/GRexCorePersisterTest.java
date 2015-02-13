@@ -18,6 +18,7 @@ package au.com.gridstone.grex.core;
 
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 
@@ -25,7 +26,7 @@ import au.com.gridstone.grex.converter.Converter;
 
 public class GRexCorePersisterTest {
 
-    private Converter converter = new TestConverter();
+    private Converter converter = Mockito.mock(Converter.class);
 
 
     @Test( expected = NullPointerException.class )

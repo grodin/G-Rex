@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 
 import au.com.gridstone.grex.BaseGRexPersister;
+import au.com.gridstone.grex.FileIODelegate;
 import au.com.gridstone.grex.converter.Converter;
 
 import static com.omricat.common.base.Preconditions.checkNotNull;
@@ -37,8 +38,9 @@ public class GRexCorePersister extends BaseGRexPersister {
      */
     public GRexCorePersister(@NotNull final Converter converter,
                              @NotNull final File directory) {
-        super(checkNotNull(converter), new JavaFileFactory(checkNotNull
-                (directory)));
+        super(checkNotNull(converter), new FileIODelegate(checkNotNull
+                (directory)) {
+        });
     }
 
 }

@@ -17,7 +17,6 @@ package au.com.gridstone.grex;/*
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -45,41 +44,21 @@ import static com.omricat.common.base.Preconditions.checkNotNull;
 public class BaseGRexPersister implements Persister {
     private final Converter converter;
 
-    private final FileFactory fileFactory;
-    private final ReaderWriterFactory ioFactory;
+    private final IODelegate ioDelegate;
 
     /**
      * Create a new instance using a provided {@link au.com.gridstone.grex
-     * .converter.Converter}, a provided {@link FileFactory} and a provided
-     * {@link ReaderWriterFactory}.
+     * .converter.Converter} and a provided {@link IODelegate}.
      *
-     * @param converter   Converter used to serialize/deserialize objects.
-     * @param fileFactory FileFactory used to get {@link java.io.File} to write
-     *                    to and read from.
-     * @param ioFactory   ReaderWriterFactory to get {@link java.io.Reader} and
-     *                    {@link java.io.Writer} to use in IO operations.
+     * @param converter  Converter used to serialize/deserialize objects.
+     * @param ioDelegate IODelegate to get {@link java.io.Reader} and {@link
+     *                   java.io.Writer} to use in IO operations.
      */
     public BaseGRexPersister(@NotNull final Converter converter,
-                             @NotNull final FileFactory fileFactory,
-                             @NotNull final ReaderWriterFactory ioFactory) {
-        this.ioFactory = checkNotNull(ioFactory);
+                             @NotNull final IODelegate ioDelegate) {
+        this.ioDelegate = checkNotNull(ioDelegate);
         this.converter = checkNotNull(converter);
-        this.fileFactory = checkNotNull(fileFactory);
     }
-
-
-    /**
-     * Create a new instance which will write and read from the filesystem.
-     *
-     * @param converter   Converter used to serialize/deserialize objects.
-     * @param fileFactory FileFactory used to get {@link java.io.File} to write
-     *                    to and read from.
-     */
-    public BaseGRexPersister(final Converter converter, final FileFactory
-            fileFactory) {
-        this(converter, fileFactory, new FileReaderWriterFactory());
-    }
-
 
     @Override
     public final <T> Observable<List<T>> putList(final String key,
@@ -92,8 +71,7 @@ public class BaseGRexPersister implements Persister {
                 Writer writer = null;
 
                 try {
-                    File outFile = getFile(key);
-                    writer = ioFactory.getWriter(outFile);
+                    writer = ioDelegate.getWriter(key);
                     converter.write(list, writer);
 
                     if (!subscriber.isUnsubscribed()) {
@@ -129,9 +107,10 @@ public class BaseGRexPersister implements Persister {
                 Reader reader = null;
 
                 try {
-                    File inFile = getFile(key);
 
-                    if (!inFile.exists()) {
+                    reader = ioDelegate.getReader(key);
+
+                    if (reader == null) {
                         if (!subscriber.isUnsubscribed()) {
                             subscriber.onNext(Collections.<T>emptyList());
                             subscriber.onCompleted();
@@ -140,7 +119,6 @@ public class BaseGRexPersister implements Persister {
                         return;
                     }
 
-                    reader = ioFactory.getReader(inFile);
                     List<T> result = converter.read(reader, listType);
 
                     if (!subscriber.isUnsubscribed()) {
@@ -234,8 +212,7 @@ public class BaseGRexPersister implements Persister {
                 Writer writer = null;
 
                 try {
-                    File outFile = getFile(key);
-                    writer = ioFactory.getWriter(outFile);
+                    writer = ioDelegate.getWriter(key);
                     converter.write(object, writer);
 
                     if (!subscriber.isUnsubscribed()) {
@@ -266,18 +243,17 @@ public class BaseGRexPersister implements Persister {
                 Reader reader = null;
 
                 try {
-                    File inFile = getFile(key);
 
-                    if (!inFile.exists()) {
+                    reader = ioDelegate.getReader(key);
+
+                    if (reader == null) {
                         if (!subscriber.isUnsubscribed()) {
-                            subscriber.onNext(null);
                             subscriber.onCompleted();
                         }
 
                         return;
                     }
 
-                    reader = ioFactory.getReader(inFile);
                     T result = converter.read(reader, type);
 
                     if (!subscriber.isUnsubscribed()) {
@@ -305,8 +281,7 @@ public class BaseGRexPersister implements Persister {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(Subscriber<? super Boolean> subscriber) {
-                File file = getFile(key);
-                boolean result = file.delete();
+                boolean result = ioDelegate.clear(key);
 
                 if (!subscriber.isUnsubscribed()) {
                     subscriber.onNext(result);
@@ -314,10 +289,6 @@ public class BaseGRexPersister implements Persister {
                 }
             }
         });
-    }
-
-    private File getFile(final String key) {
-        return fileFactory.getFile(key);
     }
 
     private static final class ListOfSomething<T> implements ParameterizedType {

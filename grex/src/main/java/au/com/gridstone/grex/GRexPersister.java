@@ -18,16 +18,13 @@ package au.com.gridstone.grex;
 
 import android.content.Context;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-
 import au.com.gridstone.grex.converter.Converter;
 
 import static android.content.Context.MODE_PRIVATE;
 
 /**
- * Facilitates the read and write of objects to and from an application's private directory.
+ * Facilitates the read and write of objects to and from an application's
+ * private directory.
  *
  * @author Christopher Horner
  * @author Joseph Cooper
@@ -38,32 +35,16 @@ public class GRexPersister extends BaseGRexPersister {
      * Create a new instances using a provided au.com.gridstone.grex.converter.
      *
      * @param context   Context used to determine file directory.
-     * @param dirName   The sub directory name to perform all read/write operations to.
+     * @param dirName   The sub directory name to perform all read/write
+     *                  operations to.
      * @param converter Converter used to serialize/deserialize objects.
      */
     public GRexPersister(final Context context, final String dirName,
                          final Converter converter) {
-        super(converter, new AndroidFileFactory(context,dirName));
-    }
-
-    public static class AndroidFileFactory implements FileFactory {
-
-        private final Context context;
-        private final String dirName;
-
-        public AndroidFileFactory(final Context context, final String dirName) {
-            this.context = context;
-            this.dirName = dirName;
-        }
-
-
-        @NotNull
-        @Override
-        public File getFile(final String key) {
-            return new File(context.getApplicationContext().getDir(dirName, MODE_PRIVATE),
-
-                    key);
-        }
+        super(converter,
+                new FileIODelegate(context
+                .getApplicationContext().getDir(dirName, MODE_PRIVATE)
+        ));
     }
 
 }

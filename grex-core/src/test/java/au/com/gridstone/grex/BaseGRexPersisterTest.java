@@ -16,50 +16,45 @@
 
 package au.com.gridstone.grex;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.com.gridstone.grex.core.TestConverter;
+import au.com.gridstone.grex.converter.Converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class BaseGRexPersisterTest {
 
+    private final IODelegate mockIODelegate = Mockito.mock(IODelegate.class);
+
+    private final Converter converter = Mockito.mock(Converter.class);
+
     @Test( expected = NullPointerException.class )
     public void testConstructor1stArgNull() {
-        new BaseGRexPersister(null, new TestFileFactory(), mockIOFactory);
+        new BaseGRexPersister(null,  mockIODelegate);
     }
+
 
     @Test( expected = NullPointerException.class )
     public void testConstructor2ndArgNull() {
-        new BaseGRexPersister(new TestConverter(), null, mockIOFactory);
-    }
-
-    @Test( expected = NullPointerException.class )
-    public void testConstructor3rdArgNull() {
-        new BaseGRexPersister(new TestConverter(), new TestFileFactory(), null);
-    }
-
-    private void unimplementedTest() {
-        fail("Test not implemented yet");
+        new BaseGRexPersister(converter, null);
     }
 
     @Test
     public void testPutReturnsSameObject() throws Exception {
-        Persister persister = new BaseGRexPersister(new TestConverter(),
-                new TestFileFactory(), mockIOFactory);
+        when(mockIODelegate.getWriter(anyString()))
+                .thenReturn(new StringWriter());
+
+        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
 
         TestData testData = new TestData("Test", 1);
 
@@ -70,34 +65,54 @@ public class BaseGRexPersisterTest {
     }
 
     @Test
-    public void testPutThenGet() throws Exception {
-        Persister persister = new BaseGRexPersister(new TestConverter(),
-                new TestFileFactory(), mockIOFactory);
+    public void testPutCallsIODelegateAndConverter() throws Exception {
+        final StringWriter writer = new StringWriter();
+        when(mockIODelegate.getWriter(anyString())).thenReturn(writer);
+
+        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
 
         TestData testData = new TestData("Test", 1);
         persister.put("TestKey", testData).toBlocking().single();
 
-        TestData getData = persister.get("TestKey", TestData.class)
-                .toBlocking().single();
+        verify(mockIODelegate).getWriter("TestKey");
 
-        assertThat(testData).isEqualTo(getData);
+        verify(converter).write(testData, writer);
+    }
+
+    @Test
+    public void testGetCallsIODelegateAndConverter() throws Exception {
+        final StringReader reader = new StringReader("");
+        when(mockIODelegate.getReader(anyString())).thenReturn(reader);
+
+        when(converter.read(any(Reader.class), eq(Object.class)))
+                .thenReturn(new Object());
+
+        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
+
+        persister.get("TestKey", Object.class).toBlocking().single();
+
+        verify(mockIODelegate).getReader("TestKey");
+
+        verify(converter).read(reader, Object.class);
+
     }
 
     @Test
     public void testGetWithNonexistentFile() throws Exception {
-        Persister persister = new BaseGRexPersister(new TestConverter(),
-                new TestFileFactory(false), mockIOFactory);
+        //Simulates a file not existing
+        when(mockIODelegate.getReader(anyString())).thenReturn(null);
 
-        Object ret = persister.get("TestKey", Object.class).toBlocking()
-                .single();
+        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
 
-        assertThat(ret).isNull();
+        List<?> ret = persister.get("TestKey", Object.class).toList()
+                .toBlocking().single();
+
+        assertThat(ret).isEmpty();
     }
 
     @Test
     public void testPutListReturnsSameList() throws Exception {
-        Persister persister = new BaseGRexPersister(new TestConverter(),
-                new TestFileFactory(), mockIOFactory);
+        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
 
         List<TestData> inList = new ArrayList<>(5);
 
@@ -111,10 +126,13 @@ public class BaseGRexPersisterTest {
         assertThat(putList).containsAll(inList);
     }
 
+
     @Test
-    public void testPutListThenGetList() throws Exception {
-        Persister persister = new BaseGRexPersister(new TestConverter(),
-                new TestFileFactory(), mockIOFactory);
+    public void testPutListCallsIODelegateAndConverter() throws Exception {
+        final StringWriter writer = new StringWriter();
+        when(mockIODelegate.getWriter(anyString())).thenReturn(writer);
+
+        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
 
         List<TestData> inList = new ArrayList<>(5);
 
@@ -123,56 +141,17 @@ public class BaseGRexPersisterTest {
             inList.add(data);
         }
 
-        persister.putList("inList", inList,
-                TestData.class).toBlocking().single();
+        persister.putList("inList", inList, TestData.class)
+                .toBlocking().single();
 
-        List<TestData> getList = persister.getList("inList",
-                TestData.class).toBlocking().single();
-        assertThat(getList).containsAll(inList);
+        verify(mockIODelegate).getWriter("inList");
+
+        verify(converter).write(inList, writer);
     }
-
-    static class TestFileFactory implements FileFactory {
-
-        private final boolean fileExists;
-
-        TestFileFactory(final boolean fileExists) {
-            this.fileExists = fileExists;
-        }
-
-        TestFileFactory() {
-            this(true);
-        }
-
-        @NotNull @Override public File getFile(final String key) {
-            File file = Mockito.mock(File.class);
-            when(file.exists()).thenReturn(fileExists);
-            return file;
-        }
-    }
-
-
-    ReaderWriterFactory mockIOFactory = new ReaderWriterFactory() {
-
-        final Reader reader = new StringReader("");
-        final StringWriter writer = new StringWriter();
-
-        @NotNull @Override
-        public Reader getReader(final File file) throws IOException {
-            return reader;
-        }
-
-        @NotNull @Override
-        public Writer getWriter(final File file) throws IOException {
-            return writer;
-        }
-    };
 
     static class TestData {
         public String string;
         public int integer;
-
-        public TestData() {
-        }
 
         public TestData(String string, int integer) {
             this.string = string;
