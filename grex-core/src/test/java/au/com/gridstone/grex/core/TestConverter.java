@@ -16,31 +16,51 @@
 
 package au.com.gridstone.grex.core;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 import au.com.gridstone.grex.converter.Converter;
 import au.com.gridstone.grex.converter.ConverterException;
 
 public class TestConverter implements Converter {
 
-    List writeLog = new ArrayList();
-    List readLog = new ArrayList();
+    TestData testData = null;
 
-    @SuppressWarnings("unchecked")
+
     @Override
     public <T> void write(final T data, final Writer writer) throws ConverterException {
-
-        writeLog.add(data);
+        testData = new TestData(data);
+        try {
+            writer.write(data.toString());
+        } catch (IOException e) {
+            throw new ConverterException(e);
+        }
     }
 
-    @SuppressWarnings("unchecked")
+
     @Override
     public <T> T read(final Reader reader, final Type type) throws
             ConverterException {
-        return null;
+        if (testData == null) {
+            throw new ConverterException(new FileNotFoundException());
+        }
+        try {
+            return (T) testData.data;
+        } catch (ClassCastException e) {
+            throw new ConverterException(e);
+        }
+    }
+
+    private static class TestData {
+        final Type type;
+        final Object data;
+
+        TestData(final Object data) {
+            this.type = data.getClass();
+            this.data = data;
+        }
     }
 }

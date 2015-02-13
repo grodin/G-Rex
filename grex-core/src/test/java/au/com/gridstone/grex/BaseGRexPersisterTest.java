@@ -26,9 +26,12 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 import au.com.gridstone.grex.core.TestConverter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
@@ -53,47 +56,79 @@ public class BaseGRexPersisterTest {
         fail("Test not implemented yet");
     }
 
-
-
-
     @Test
-    public void testPutList() throws Exception {
-        unimplementedTest();
+    public void testPutReturnsSameObject() throws Exception {
+        Persister persister = new BaseGRexPersister(new TestConverter(),
+                new TestFileFactory(), mockIOFactory);
+
+        TestData testData = new TestData("Test", 1);
+
+        TestData putData = persister.put("TestKey", testData).toBlocking()
+                .single();
+
+        assertThat(testData).isEqualTo(putData);
     }
 
     @Test
-    public void testGetList() throws Exception {
-        unimplementedTest();
+    public void testPutThenGet() throws Exception {
+        Persister persister = new BaseGRexPersister(new TestConverter(),
+                new TestFileFactory(), mockIOFactory);
+
+        TestData testData = new TestData("Test", 1);
+        persister.put("TestKey", testData).toBlocking().single();
+
+        TestData getData = persister.get("TestKey", TestData.class)
+                .toBlocking().single();
+
+        assertThat(testData).isEqualTo(getData);
     }
 
     @Test
-    public void testAddToList() throws Exception {
-        unimplementedTest();
+    public void testGetWithNonexistentFile() throws Exception {
+        Persister persister = new BaseGRexPersister(new TestConverter(),
+                new TestFileFactory(false), mockIOFactory);
+
+        Object ret = persister.get("TestKey", Object.class).toBlocking()
+                .single();
+
+        assertThat(ret).isNull();
     }
 
     @Test
-    public void testRemoveFromList() throws Exception {
-        unimplementedTest();
+    public void testPutListReturnsSameList() throws Exception {
+        Persister persister = new BaseGRexPersister(new TestConverter(),
+                new TestFileFactory(), mockIOFactory);
+
+        List<TestData> inList = new ArrayList<>(5);
+
+        for (int i = 0; i < 5; i++) {
+            TestData data = new TestData("test" + i, +i);
+            inList.add(data);
+        }
+
+        List<TestData> putList = persister.putList("inList", inList,
+                TestData.class).toBlocking().single();
+        assertThat(putList).containsAll(inList);
     }
 
     @Test
-    public void testRemoveFromList1() throws Exception {
-        unimplementedTest();
-    }
+    public void testPutListThenGetList() throws Exception {
+        Persister persister = new BaseGRexPersister(new TestConverter(),
+                new TestFileFactory(), mockIOFactory);
 
-    @Test
-    public void testPut() throws Exception {
-        unimplementedTest();
-    }
+        List<TestData> inList = new ArrayList<>(5);
 
-    @Test
-    public void testGet() throws Exception {
-        unimplementedTest();
-    }
+        for (int i = 0; i < 5; i++) {
+            TestData data = new TestData("test" + i, +i);
+            inList.add(data);
+        }
 
-    @Test
-    public void testClear() throws Exception {
-        unimplementedTest();
+        persister.putList("inList", inList,
+                TestData.class).toBlocking().single();
+
+        List<TestData> getList = persister.getList("inList",
+                TestData.class).toBlocking().single();
+        assertThat(getList).containsAll(inList);
     }
 
     static class TestFileFactory implements FileFactory {
@@ -110,7 +145,7 @@ public class BaseGRexPersisterTest {
 
         @NotNull @Override public File getFile(final String key) {
             File file = Mockito.mock(File.class);
-            when(file.exists()).thenReturn(true);
+            when(file.exists()).thenReturn(fileExists);
             return file;
         }
     }
@@ -131,4 +166,33 @@ public class BaseGRexPersisterTest {
             return writer;
         }
     };
+
+    static class TestData {
+        public String string;
+        public int integer;
+
+        public TestData() {
+        }
+
+        public TestData(String string, int integer) {
+            this.string = string;
+            this.integer = integer;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof TestData)) {
+                return false;
+            }
+
+            TestData otherData = (TestData) o;
+
+            if (string != null)
+                return string.equals(otherData.string) && integer ==
+                        otherData.integer;
+
+            return otherData.string == null && integer == otherData.integer;
+        }
+    }
+
 }
