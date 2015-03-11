@@ -15,8 +15,6 @@ package au.com.gridstone.grex;/*
  */
 
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -53,8 +51,8 @@ public class BaseGRexPersister implements Persister {
      * @param ioDelegate IODelegate to get {@link java.io.Reader} and {@link
      *                   java.io.Writer} to use in IO operations.
      */
-    public BaseGRexPersister(@NotNull final Converter converter,
-                             @NotNull final IODelegate ioDelegate) {
+    public BaseGRexPersister(final Converter converter,
+                             final IODelegate ioDelegate) {
         this.ioDelegate = ioDelegate;
         this.converter = converter;
     }

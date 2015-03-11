@@ -15,8 +15,6 @@
  */
 package au.com.gridstone.grex.core;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 
 import au.com.gridstone.grex.BaseGRexPersister;
@@ -34,8 +32,8 @@ public class GRexCorePersister extends BaseGRexPersister {
      * @param directory Directory to write/read files, not null. {@link
      *                  File#isDirectory()} must return true on this parameter
      */
-    public GRexCorePersister(@NotNull final Converter converter,
-                             @NotNull final File directory) {
+    public GRexCorePersister(final Converter converter,
+                             final File directory) {
         super(converter, new FileIODelegate(directory) {
         });
     }

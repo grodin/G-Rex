@@ -27,7 +27,6 @@ repositories {
 dependencies {
 
     compile "$rootProject.ext.rxJava"
-    compile 'org.jetbrains:annotations:13.0@jar'
 
     testCompile "$rootProject.ext.junit"
     testCompile "$rootProject.ext.assertj"

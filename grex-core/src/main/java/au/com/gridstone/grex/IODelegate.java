@@ -16,8 +16,6 @@
 
 package au.com.gridstone.grex;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -52,7 +50,7 @@ public interface IODelegate {
      *
      * @param key the key to use to write to storage.
      */
-    @NotNull public Writer getWriter(final String key) throws IOException;
+    public Writer getWriter(final String key) throws IOException;
 
     /**
      * Deletes the storage associated to the the given key.

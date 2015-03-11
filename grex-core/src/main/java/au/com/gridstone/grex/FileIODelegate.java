@@ -16,7 +16,6 @@
 
 package au.com.gridstone.grex;
 
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileReader;
@@ -34,7 +33,7 @@ public class FileIODelegate implements IODelegate {
 
     private final File directory;
 
-    public FileIODelegate(@NotNull final File directory) {
+    public FileIODelegate(final File directory) {
         this.directory = directory;
     }
 
@@ -42,7 +41,7 @@ public class FileIODelegate implements IODelegate {
     // return type here, but I don't want to pull in a huge dependency like
     // Guava and this needs to be Java 7 compatible for Android use.
     @Override
-    public Reader getReader(@NotNull final String key) throws IOException {
+    public Reader getReader(final String key) throws IOException {
         final File file = getFile(key);
         if (!file.exists()) {
             return null; //eurgh, returning null!
@@ -51,12 +50,12 @@ public class FileIODelegate implements IODelegate {
         }
     }
 
-    @NotNull @Override
-    public Writer getWriter(@NotNull final String key) throws IOException {
+    @Override
+    public Writer getWriter(final String key) throws IOException {
         return new FileWriter(getFile(key));
     }
 
-    @Override public boolean clear(@NotNull final String key) {
+    @Override public boolean clear(final String key) {
         return getFile(key).delete();
     }
 
