@@ -46,9 +46,9 @@ android {
 }
 
 dependencies {
-    compile 'io.reactivex:rxandroid:0.23.0'
     compile project(':grex-core')
-    compile 'io.reactivex:rxjava:1.0.7'
+    compile "$rootProject.ext.rxAndroid"
+    compile "$rootProject.ext.rxJava"
 }
 
 android.libraryVariants.all { variant ->

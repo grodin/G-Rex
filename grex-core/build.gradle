@@ -26,11 +26,11 @@ repositories {
 
 dependencies {
 
-    compile 'io.reactivex:rxjava:1.0.1'
+    compile "$rootProject.ext.rxJava"
     compile 'org.jetbrains:annotations:13.0@jar'
 
-    testCompile 'junit:junit:4.11'
-    testCompile 'org.assertj:assertj-core:1.7.0'
-    testCompile "org.mockito:mockito-core:1.10.14"
+    testCompile "$rootProject.ext.junit"
+    testCompile "$rootProject.ext.assertj"
+    testCompile "$rootProject.ext.mockito"
 }
 
