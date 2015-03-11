@@ -5,7 +5,7 @@ import java.util.List;
 import rx.Observable;
 
 /**
- * Created by jsc on 10/12/14.
+ * An interface representing a persistence layer.
  */
 public interface Persister {
     /**

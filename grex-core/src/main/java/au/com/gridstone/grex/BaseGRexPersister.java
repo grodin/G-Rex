@@ -32,8 +32,6 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Func1;
 
-import static com.omricat.common.base.Preconditions.checkNotNull;
-
 /**
  * Facilitates the read and write of objects to and from an application's
  * private directory.
@@ -48,6 +46,7 @@ public class BaseGRexPersister implements Persister {
 
     /**
      * Create a new instance using a provided {@link au.com.gridstone.grex
+     * .converter.Converter}
      * .converter.Converter} and a provided {@link IODelegate}.
      *
      * @param converter  Converter used to serialize/deserialize objects.
@@ -56,8 +55,8 @@ public class BaseGRexPersister implements Persister {
      */
     public BaseGRexPersister(@NotNull final Converter converter,
                              @NotNull final IODelegate ioDelegate) {
-        this.ioDelegate = checkNotNull(ioDelegate);
-        this.converter = checkNotNull(converter);
+        this.ioDelegate = ioDelegate;
+        this.converter = converter;
     }
 
     @Override

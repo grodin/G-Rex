@@ -16,8 +16,6 @@
 
 package au.com.gridstone.grex;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 
 /**
@@ -31,5 +29,5 @@ public interface FileFactory {
      * Return a {@link File} from a {@code String} key.
      * Must not return null.
      */
-    public @NotNull File getFile(final String key);
+    public File getFile(final String key);
 }

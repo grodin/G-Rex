@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
-import static com.omricat.common.base.Preconditions.checkArgument;
-import static com.omricat.common.base.Preconditions.checkNotNull;
 
 /**
  * Implementation of ReaderWriterFactory which returns {@link java.io.FileReader}
@@ -37,8 +35,6 @@ public class FileIODelegate implements IODelegate {
     private final File directory;
 
     public FileIODelegate(@NotNull final File directory) {
-        checkNotNull(directory);
-        checkArgument(directory.isDirectory(), "not a directory");
         this.directory = directory;
     }
 
@@ -47,7 +43,7 @@ public class FileIODelegate implements IODelegate {
     // Guava and this needs to be Java 7 compatible for Android use.
     @Override
     public Reader getReader(@NotNull final String key) throws IOException {
-        final File file = getFile(checkNotNull(key));
+        final File file = getFile(key);
         if (!file.exists()) {
             return null; //eurgh, returning null!
         } else {
@@ -57,11 +53,11 @@ public class FileIODelegate implements IODelegate {
 
     @NotNull @Override
     public Writer getWriter(@NotNull final String key) throws IOException {
-        return new FileWriter(getFile(checkNotNull(key)));
+        return new FileWriter(getFile(key));
     }
 
     @Override public boolean clear(@NotNull final String key) {
-        return getFile(checkNotNull(key)).delete();
+        return getFile(key).delete();
     }
 
     private File getFile(final String key) {
