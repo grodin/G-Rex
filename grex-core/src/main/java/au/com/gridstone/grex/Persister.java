@@ -23,8 +23,8 @@ public interface Persister {
      *
      * @param key  The key that the List is stored against.
      * @param type The type of each item stored in the List.
-     * @return An Observable that returns the read list in its onNext(). If no stored List is found,
-     * an immutable empty List will be returned.
+     * @return An Observable that returns the read list in its onNext(). If no list is found, then
+     * onCompleted() will be called immediately.
      */
     <T> Observable<List<T>> getList(String key, Class<T> type);
 
