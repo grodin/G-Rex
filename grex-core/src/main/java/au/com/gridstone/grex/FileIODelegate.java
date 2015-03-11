@@ -27,7 +27,7 @@ import java.io.Writer;
 
 
 /**
- * Implementation of ReaderWriterFactory which returns {@link java.io.FileReader}
+ * Implementation of IODelegate which returns {@link java.io.FileReader}
  * and {@link java.io.FileWriter}.
  */
 public class FileIODelegate implements IODelegate {
