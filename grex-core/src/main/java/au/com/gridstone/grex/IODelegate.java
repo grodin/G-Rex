@@ -36,7 +36,7 @@ public interface IODelegate {
      * Returns a {@link java.io.Reader} to allow reading from the storage
      * associated with the given key.
      * <p/>
-     * May return null only if there is no storage for the given key.
+     * Should return null if and only if there is no storage for the given key.
      *
      * @param key the key to look up in storage.
      */

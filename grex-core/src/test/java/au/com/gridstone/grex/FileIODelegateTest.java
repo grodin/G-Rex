@@ -22,6 +22,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
@@ -57,4 +58,18 @@ public class FileIODelegateTest {
         assertThat(ret).isInstanceOf(FileWriter.class);
     }
 
+    @Test
+    public void testWriteDataThenClear() throws IOException {
+
+        final FileIODelegate delegate =
+                new FileIODelegate(tmpDir.getRoot());
+
+        delegate.getWriter("TestKey").append("Test data").close();
+
+        boolean ret = delegate.clear("TestKey");
+
+        assertThat(ret).isTrue();
+
+        assertThat(delegate.getReader("TestKey")).isNull();
+    }
 }
