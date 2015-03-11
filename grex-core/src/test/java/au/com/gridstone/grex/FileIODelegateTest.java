@@ -32,21 +32,6 @@ public class FileIODelegateTest {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder();
 
-    @Test(expected = NullPointerException.class)
-    public void testConstructor_NullArg() throws Exception {
-        new FileIODelegate(null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testConstructor_NonDirectoryArg() throws Exception {
-        new FileIODelegate(tmpDir.newFile());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testGetReader_NullKey() throws Exception {
-        new FileIODelegate(tmpDir.getRoot()).getReader(null);
-    }
-
     @Test
     public void testGetReader_NonExistentFile() throws Exception {
         IODelegate delegate = new FileIODelegate(tmpDir.newFolder());
@@ -64,11 +49,6 @@ public class FileIODelegateTest {
         assertThat(ret).isInstanceOf(FileReader.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testGetWriter_NullParam() throws Exception {
-        new FileIODelegate(tmpDir.getRoot()).getWriter(null);
-    }
-
     @Test
     public void testGetWriterReturnsFileWriter() throws Exception {
         tmpDir.newFile("TestKey");
@@ -77,8 +57,4 @@ public class FileIODelegateTest {
         assertThat(ret).isInstanceOf(FileWriter.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testClear_NullParam() throws Exception {
-        new FileIODelegate(tmpDir.getRoot()).clear(null);
-    }
 }

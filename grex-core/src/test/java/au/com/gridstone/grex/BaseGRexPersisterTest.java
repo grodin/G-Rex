@@ -38,16 +38,6 @@ public class BaseGRexPersisterTest {
 
     private final Converter converter = Mockito.mock(Converter.class);
 
-    @Test( expected = NullPointerException.class )
-    public void testConstructor1stArgNull() {
-        new BaseGRexPersister(null,  mockIODelegate);
-    }
-
-
-    @Test( expected = NullPointerException.class )
-    public void testConstructor2ndArgNull() {
-        new BaseGRexPersister(converter, null);
-    }
 
     @Test
     public void testPutReturnsSameObject() throws Exception {
