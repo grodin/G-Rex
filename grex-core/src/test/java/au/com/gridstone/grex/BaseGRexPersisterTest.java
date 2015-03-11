@@ -23,14 +23,15 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import au.com.gridstone.grex.converter.Converter;
 
+import static au.com.gridstone.grex.BaseGRexPersister.ListOfSomething;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class BaseGRexPersisterTest {
 
@@ -65,8 +66,10 @@ public class BaseGRexPersisterTest {
         persister.put("TestKey", testData).toBlocking().single();
 
         verify(mockIODelegate).getWriter("TestKey");
+        verifyNoMoreInteractions(mockIODelegate);
 
         verify(converter).write(testData, writer);
+        verifyNoMoreInteractions(converter);
     }
 
     @Test
@@ -82,9 +85,10 @@ public class BaseGRexPersisterTest {
         persister.get("TestKey", Object.class).toBlocking().single();
 
         verify(mockIODelegate).getReader("TestKey");
+        verifyNoMoreInteractions(mockIODelegate);
 
         verify(converter).read(reader, Object.class);
-
+        verifyNoMoreInteractions(converter);
     }
 
     @Test
@@ -135,8 +139,50 @@ public class BaseGRexPersisterTest {
                 .toBlocking().single();
 
         verify(mockIODelegate).getWriter("inList");
+        verifyNoMoreInteractions(mockIODelegate);
 
         verify(converter).write(inList, writer);
+        verifyNoMoreInteractions(converter);
+    }
+
+    @Test
+    public void testGetListCallsToIODelegateAndConverter() throws Exception {
+        final StringReader reader = new StringReader("");
+        when(mockIODelegate.getReader(anyString())).thenReturn(reader);
+
+        final List<Object> objects = Arrays.asList(new Object(),
+                new Object(), new Object());
+        final ListOfSomething<Object> listType =
+                ListOfSomething.wrap(Object.class);
+        when(converter.read(any(Reader.class), eq(listType)))
+                .thenReturn(objects);
+
+        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
+
+        persister.getList("test",Object.class).toBlocking().single();
+
+        verify(mockIODelegate).getReader("test");
+        verifyNoMoreInteractions(mockIODelegate);
+
+        verify(converter).read(eq(reader), any(ListOfSomething.class));
+        verifyNoMoreInteractions(converter);
+    }
+
+
+    @Test
+    public void testClearCallsToDelegate() throws Exception {
+
+        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
+
+        when(mockIODelegate.clear(anyString())).thenReturn(true);
+
+        persister.clear("test").toBlocking().single();
+
+        verify(mockIODelegate).clear(eq("test"));
+        verifyNoMoreInteractions(mockIODelegate);
+
+        verifyZeroInteractions(converter);
+
     }
 
     static class TestData {

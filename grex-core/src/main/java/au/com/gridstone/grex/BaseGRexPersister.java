@@ -351,11 +351,15 @@ public class BaseGRexPersister implements Persister {
         });
     }
 
-    private static final class ListOfSomething<T> implements ParameterizedType {
+    static final class ListOfSomething<T> implements ParameterizedType {
         private final Class<?> wrappedType;
 
         public ListOfSomething(Class<T> wrappedType) {
             this.wrappedType = wrappedType;
+        }
+
+        public static <T> ListOfSomething<T> wrap(Class<T> wrappedType) {
+            return new ListOfSomething<>(wrappedType);
         }
 
         @Override
