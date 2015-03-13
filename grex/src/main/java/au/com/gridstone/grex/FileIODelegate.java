@@ -17,12 +17,17 @@
 package au.com.gridstone.grex;
 
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 
 
 /**
@@ -32,6 +37,8 @@ import java.io.Writer;
 public class FileIODelegate implements IODelegate {
 
     private final File directory;
+
+    private final static Charset CHARSET = Charset.forName("UTF-8");
 
     public FileIODelegate(final File directory) {
         this.directory = directory;
@@ -46,13 +53,15 @@ public class FileIODelegate implements IODelegate {
         if (!file.exists()) {
             return null; //eurgh, returning null!
         } else {
-            return new FileReader(file);
+            return new BufferedReader(new InputStreamReader(
+                    new FileInputStream(file),CHARSET.newDecoder()));
         }
     }
 
     @Override
     public Writer getWriter(final String key) throws IOException {
-        return new FileWriter(getFile(key));
+        return new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(getFile(key)), CHARSET.newEncoder()));
     }
 
     @Override
