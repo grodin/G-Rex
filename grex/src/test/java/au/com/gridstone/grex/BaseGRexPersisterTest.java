@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import au.com.gridstone.grex.converter.Converter;
+import rx.observers.TestSubscriber;
 
 import static au.com.gridstone.grex.BaseGRexPersister.ListOfSomething;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,11 +48,12 @@ public class BaseGRexPersisterTest {
         when(mockIODelegate.getWriter(anyString()))
                 .thenReturn(new StringWriter());
 
-        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
 
-        TestData testData = new TestData("Test", 1);
+        final TestData testData = new TestData("Test", 1);
 
-        TestData putData = persister.put("TestKey", testData).toBlocking()
+        final TestData putData = persister.put("TestKey", testData).toBlocking()
                 .single();
 
         assertThat(testData).isEqualTo(putData);
@@ -62,9 +64,10 @@ public class BaseGRexPersisterTest {
         final StringWriter writer = new StringWriter();
         when(mockIODelegate.getWriter(anyString())).thenReturn(writer);
 
-        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
 
-        TestData testData = new TestData("Test", 1);
+        final TestData testData = new TestData("Test", 1);
         persister.put("TestKey", testData).toBlocking().single();
 
         verify(mockIODelegate).getWriter("TestKey");
@@ -82,7 +85,8 @@ public class BaseGRexPersisterTest {
         when(converter.read(any(Reader.class), eq(Object.class)))
                 .thenReturn(new Object());
 
-        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
 
         persister.get("TestKey", Object.class).toBlocking().single();
 
@@ -98,9 +102,10 @@ public class BaseGRexPersisterTest {
         //Simulates a file not existing
         when(mockIODelegate.getReader(anyString())).thenReturn(null);
 
-        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
 
-        List<?> ret = persister.get("TestKey", Object.class).toList()
+        final List<?> ret = persister.get("TestKey", Object.class).toList()
                 .toBlocking().single();
 
         assertThat(ret).isEmpty();
@@ -108,16 +113,17 @@ public class BaseGRexPersisterTest {
 
     @Test
     public void testPutListReturnsSameList() throws Exception {
-        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
 
-        List<TestData> inList = new ArrayList<>(5);
+        final List<TestData> inList = new ArrayList<>(5);
 
         for (int i = 0; i < 5; i++) {
             TestData data = new TestData("test" + i, +i);
             inList.add(data);
         }
 
-        List<TestData> putList = persister.putList("inList", inList,
+        final List<TestData> putList = persister.putList("inList", inList,
                 TestData.class).toBlocking().single();
         assertThat(putList).containsAll(inList);
     }
@@ -128,9 +134,10 @@ public class BaseGRexPersisterTest {
         final StringWriter writer = new StringWriter();
         when(mockIODelegate.getWriter(anyString())).thenReturn(writer);
 
-        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
 
-        List<TestData> inList = new ArrayList<>(5);
+        final List<TestData> inList = new ArrayList<>(5);
 
         for (int i = 0; i < 5; i++) {
             TestData data = new TestData("test" + i, +i);
@@ -170,13 +177,120 @@ public class BaseGRexPersisterTest {
         verifyNoMoreInteractions(converter);
     }
 
+    @Test
+    public void testAddToList() throws Exception {
+        when(mockIODelegate.getReader(eq("Test")))
+                .thenReturn(new StringReader(""));
+        when(converter.read(any(Reader.class), any(ListOfSomething.class)))
+                .thenReturn(Arrays.asList(1,2,3));
+
+        when(mockIODelegate.getWriter(eq("Test")))
+                .thenReturn(new StringWriter());
+
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
+
+        final List<Integer> ret = persister.addToList("Test",4,Integer.class)
+                .toBlocking().single();
+
+        assertThat(ret).containsExactly(1, 2, 3, 4);
+    }
+
+    @Test
+    public void testAddToList_NoExistingData() throws Exception {
+        when(mockIODelegate.getReader(eq("Test")))
+                .thenReturn(null); //signal that there is no data for this key
+
+        when(mockIODelegate.getWriter(eq("Test")))
+                .thenReturn(new StringWriter());
+
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
+
+        final List<Integer> ret = persister.addToList("Test",4,Integer.class)
+                .toBlocking().single();
+
+        assertThat(ret).containsExactly(4);
+    }
+
+    @Test
+    public void testRemoveFromListByObject() throws Exception {
+        when(mockIODelegate.getReader(eq("Test")))
+                .thenReturn(new StringReader(""));
+        when(converter.read(any(Reader.class), any(ListOfSomething.class)))
+                .thenReturn(Arrays.asList("1", "2", "3"));
+
+        when(mockIODelegate.getWriter(eq("Test")))
+                .thenReturn(new StringWriter());
+
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
+
+        final List<String> ret = persister
+                .removeFromList("Test","2" , String.class)
+                .toBlocking().single();
+
+        assertThat(ret).containsExactly("1","3");
+    }
+
+    @Test
+    public void testRemoveFromListByIndex() throws Exception {
+        when(mockIODelegate.getReader(eq("Test")))
+                .thenReturn(new StringReader(""));
+        when(converter.read(any(Reader.class), any(ListOfSomething.class)))
+                .thenReturn(Arrays.asList(1, 2, 3));
+
+        when(mockIODelegate.getWriter(eq("Test")))
+                .thenReturn(new StringWriter());
+
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
+
+        final List<Integer> ret = persister
+                .removeFromList("Test", 1, Integer.class)
+                .toBlocking().single();
+
+        assertThat(ret).containsExactly(1,3);
+    }
+
+    @Test
+    public void testRemoveFromListByIndex_IndexOutOfBounds() throws Exception {
+        when(mockIODelegate.getReader(eq("Test")))
+                .thenReturn(new StringReader(""));
+        when(converter.read(any(Reader.class), any(ListOfSomething.class)))
+                .thenReturn(Arrays.asList(1, 2, 3));
+
+        when(mockIODelegate.getWriter(eq("Test")))
+                .thenReturn(new StringWriter());
+
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
+
+        final TestSubscriber<List<Integer>> testSubscriber = new TestSubscriber<>();
+
+        persister.removeFromList("Test", Integer.MAX_VALUE, Integer.class)
+                    .subscribe(testSubscriber);
+
+        testSubscriber.awaitTerminalEvent();
+
+        testSubscriber.assertTerminalEvent();
+
+        final List<Throwable> errors = testSubscriber.getOnErrorEvents();
+
+        assertThat(errors).hasSize(1);
+
+        assertThat(errors.get(0))
+                .isExactlyInstanceOf(IndexOutOfBoundsException.class);
+
+    }
 
     @Test
     public void testClearCallsToDelegate() throws Exception {
 
-        Persister persister = new BaseGRexPersister(converter, mockIODelegate);
-
         when(mockIODelegate.clear(anyString())).thenReturn(true);
+
+        final Persister persister = new BaseGRexPersister(converter,
+                mockIODelegate);
 
         persister.clear("test").toBlocking().single();
 
