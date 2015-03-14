@@ -20,14 +20,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Writer;
+import java.util.Scanner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SuppressWarnings( "TryFinallyCanBeTryWithResources" )
 public class FileIODelegateTest {
 
     @Rule
@@ -43,22 +42,6 @@ public class FileIODelegateTest {
     }
 
     @Test
-    public void testGetReaderReturnsFileReader() throws Exception {
-        tmpDir.newFile("TestKey");
-        Reader ret = new FileIODelegate(tmpDir.getRoot()).getReader("TestKey");
-
-        assertThat(ret).isInstanceOf(FileReader.class);
-    }
-
-    @Test
-    public void testGetWriterReturnsFileWriter() throws Exception {
-        tmpDir.newFile("TestKey");
-        Writer ret = new FileIODelegate(tmpDir.getRoot()).getWriter("TestKey");
-
-        assertThat(ret).isInstanceOf(FileWriter.class);
-    }
-
-    @Test
     public void testWriteDataThenClear() throws IOException {
 
         final FileIODelegate delegate =
@@ -71,5 +54,33 @@ public class FileIODelegateTest {
         assertThat(ret).isTrue();
 
         assertThat(delegate.getReader("TestKey")).isNull();
+    }
+
+    @Test
+    public void testWriteThenReadReturnsSameData() throws Exception {
+
+        final FileIODelegate delegate =
+                new FileIODelegate(tmpDir.getRoot());
+
+        delegate.getWriter("TestKey").append("Test data").close();
+
+        Scanner scanner = new Scanner(delegate.getReader("TestKey"));
+
+        String ret = null;
+        try {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.append(scanner.hasNext() ? scanner.next() : "");
+
+            while(scanner.hasNext()) {
+                stringBuilder.append(" ").append(scanner.next());
+            }
+
+            ret = stringBuilder.toString();
+        } finally {
+            scanner.close();
+        }
+
+        assertThat(ret).isNotEmpty().isEqualTo("Test data");
     }
 }

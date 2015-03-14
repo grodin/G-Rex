@@ -17,8 +17,6 @@
 package au.com.gridstone.grex;
 
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,8 +29,10 @@ import java.nio.charset.Charset;
 
 
 /**
- * Implementation of IODelegate which returns {@link java.io.FileReader}
- * and {@link java.io.FileWriter}.
+ * Implementation of IODelegate which returns a unbuffered {@link java.io
+ * .Reader} and {@link java.io.Writer}, each accessing a {@link java.io.File}.
+ * The parameter {@code key} will name the {@code File}, which will be read and
+ * written with UTF-8 encoding.
  */
 public class FileIODelegate implements IODelegate {
 
@@ -53,15 +53,15 @@ public class FileIODelegate implements IODelegate {
         if (!file.exists()) {
             return null; //eurgh, returning null!
         } else {
-            return new BufferedReader(new InputStreamReader(
-                    new FileInputStream(file),CHARSET.newDecoder()));
+            return new InputStreamReader(
+                    new FileInputStream(file), CHARSET.newDecoder());
         }
     }
 
     @Override
     public Writer getWriter(final String key) throws IOException {
-        return new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(getFile(key)), CHARSET.newEncoder()));
+        return new OutputStreamWriter(
+                new FileOutputStream(getFile(key)), CHARSET.newEncoder());
     }
 
     @Override
